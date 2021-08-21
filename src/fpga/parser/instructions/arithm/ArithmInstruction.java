@@ -96,6 +96,14 @@ public class ArithmInstruction extends Instruction {
 			}
 		case "inv.w":
 			return new byte[] { (byte) (this.destReg), (byte) 0x8a };
+		case "fadd":
+			return new byte[] { (byte) ((this.srcReg << 4) + this.destReg), (byte) 0x2b };
+		case "fsub":
+			return new byte[] { (byte) ((this.srcReg << 4) + this.destReg), (byte) 0x3b };
+		case "fmul":
+			return new byte[] { (byte) ((this.srcReg << 4) + this.destReg), (byte) 0x4b };
+		case "fdiv":
+			return new byte[] { (byte) ((this.srcReg << 4) + this.destReg), (byte) 0x5b };
 		default:
 			throw new FPGAParseException("Instruction " + super.name + " is not generating code.");
 		}

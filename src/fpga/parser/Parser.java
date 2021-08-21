@@ -45,7 +45,7 @@ public class Parser {
 	int state;
 
 	public Instructions instructions = new Instructions();
-	public  String mainFileName;
+	public String mainFileName;
 
 	public Parser(String mainFileName) {
 		this.mainFileName = mainFileName;
@@ -58,7 +58,7 @@ public class Parser {
 		this.state = IDLE;
 		this.current = null;
 	}
-	
+
 	// TODO: static functions!
 	// TODO: #include <file.c>!
 	public void parse(String line, int lineCount, String fileName, boolean verbose)
@@ -73,15 +73,27 @@ public class Parser {
 					((Variable) this.current).type = getType((Variable) this.current);
 					if (this.globalVars.get(this.current.name) == null)
 						this.globalVars.put(this.current.name, ((Variable) this.current));
-					else { 
-						if (verbose) System.err.println("WARNING: Global variable " + this.current.name + " already exists. Filename: " + fileName + " at line: " + line);
+					else {
+						if (verbose)
+							System.err.println("WARNING: Global variable " + this.current.name
+									+ " already exists. Filename: " + fileName + " at line: " + line);
 					}
 				} else {
 //					System.out.println(this.current.name + ", " + fileName);
-					if (this.functions.get(this.current.name) == null || this.current.name.equals("main"))
-						this.functions.put(this.current.name, ((Function) this.current));
-					else { 
-						if (verbose) System.err.println("WARNING: Function " + this.current.name + " already exists. Filename: " + fileName + " at line: " + line);
+					try {
+						if (this.functions.get(this.current.name) == null || this.current.name.equals("main")) {
+							this.functions.put(this.current.name, ((Function) this.current));
+						} else {
+							if (verbose)
+								System.err.println("WARNING: Function " + this.current.name
+										+ " already exists. Filename: " + fileName + " at line: " + line);
+						}
+					} catch (Exception ex) {
+						if (verbose)
+							System.err.println("WARNING: Function " + this.current.name
+									+ " does not exist (probably internal GCC function). Filename: " + fileName + " at line: " + line);
+//						System.err.println(ex.getMessage());
+//						System.out.println(this.current.name + ", " + fileName);
 					}
 				}
 			}
@@ -106,7 +118,7 @@ public class Parser {
 				this.strings.put(fileName + name, v);
 				this.state = STRING;
 				return;
-			} else if(firstToken.equals(".equ")) {
+			} else if (firstToken.equals(".equ")) {
 				parseConst(line);
 				return;
 			}
@@ -122,7 +134,7 @@ public class Parser {
 				this.strings.put(fileName + name, v);
 				this.state = STRING;
 				return;
-			} else if(firstToken.equals(".equ")) {
+			} else if (firstToken.equals(".equ")) {
 				parseConst(line);
 				return;
 			}
@@ -138,7 +150,7 @@ public class Parser {
 					this.current = new Function(this.current, fileName);
 					this.current.type = AssemblerObject.FUNCTION;
 					this.state = FUNCTION;
-					
+
 					break;
 				}
 				break;
@@ -157,13 +169,14 @@ public class Parser {
 				((Variable) this.current).itemCount++;
 				break;
 			case ".ascii":
-				String s = getString(line);//getToken(line, 1);
-				//s = s.substring(1, s.length() - 1);
+				String s = getString(line);// getToken(line, 1);
+				// s = s.substring(1, s.length() - 1);
 
 				s = StringEscapeUtils.unescapeJava(s);
 
 				((Variable) this.current).add(s.getBytes(StandardCharsets.ISO_8859_1));
-				//((Variable) this.current).itemCount = ((Variable) this.current).content.length;
+				// ((Variable) this.current).itemCount = ((Variable)
+				// this.current).content.length;
 				break;
 			case ".byte":
 				content = getToken(line, 1);
@@ -202,8 +215,9 @@ public class Parser {
 //System.out.println("################ " + s);				
 				s = s.substring(1, s.length() - 1) + "\u0000";
 				s = StringEscapeUtils.unescapeJava(s);
-				((Variable) this.current).add(s.getBytes(StandardCharsets.ISO_8859_1)); //StandardCharsets.UTF_8)
-				//((Variable) this.current).itemCount += ((Variable) this.current).content.length;
+				((Variable) this.current).add(s.getBytes(StandardCharsets.ISO_8859_1)); // StandardCharsets.UTF_8)
+				// ((Variable) this.current).itemCount += ((Variable)
+				// this.current).content.length;
 				break;
 			}
 			break;
@@ -243,10 +257,10 @@ public class Parser {
 					i.source = line;
 					f.instructions.add(i);
 					i.owner = f;
-					i.lineCount = lineCount; 
+					i.lineCount = lineCount;
 				} else {
-					throw new FPGAParseException(
-							"Unknown instruction " + firstToken + " in file " + this.fileName + ", line: " + lineCount + ": " + line);
+					throw new FPGAParseException("Unknown instruction " + firstToken + " in file " + this.fileName
+							+ ", line: " + lineCount + ": " + line);
 				}
 			} else {
 				// Labels
@@ -276,7 +290,7 @@ public class Parser {
 	private void parseConst(String line) {
 		String name = getToken(line, 1).trim();
 		if (name.endsWith(",")) {
-			name = name.substring(0, name.length()-1);
+			name = name.substring(0, name.length() - 1);
 		}
 		String value = getTokenBefore(getTokenAfter(line, ','), '#');
 		int val;
@@ -366,14 +380,15 @@ public class Parser {
 		Function main = this.functions.get("main");
 		if (main != null) {
 			if (addr == 0xB000 || addr == 39424) {
-				// this is for the boot loader programs, being assembled to be loaded by the boot loader
+				// this is for the boot loader programs, being assembled to be loaded by the
+				// boot loader
 				// boot loader programs begin at 0xB000 and has the stack set to 400000.
-				
+
 				// add mov.w sp, 465536 instruction at the beginning of the main function
 				main.instructions.add(0, getStackInstruction());
 				// replace ret instruction with the halt instruction
-				if (main.instructions.get(main.instructions.size()-1).name.equals("ret")) {
-					main.instructions.set(main.instructions.size()-1, getHaltInstruction());
+				if (main.instructions.get(main.instructions.size() - 1).name.equals("ret")) {
+					main.instructions.set(main.instructions.size() - 1, getHaltInstruction());
 				}
 			}
 			for (Instruction i : main.instructions) {
@@ -420,10 +435,10 @@ public class Parser {
 			@Override
 			public void prepare(Parser parser, Function f) throws FPGAParseException {
 			}
-			
+
 			@Override
 			public byte[] generate() {
-				return new byte[] {(byte)0xff, (byte)0xf0};
+				return new byte[] { (byte) 0xff, (byte) 0xf0 };
 			}
 		};
 		return i;
@@ -434,10 +449,10 @@ public class Parser {
 			@Override
 			public void prepare(Parser parser, Function f) throws FPGAParseException {
 			}
-			
+
 			@Override
 			public byte[] generate() {
-				return new byte[] {0x0f, (byte)0xb0, 0x00, 0x07, (byte)0x1a, (byte)0x80};
+				return new byte[] { 0x0f, (byte) 0xb0, 0x00, 0x07, (byte) 0x1a, (byte) 0x80 };
 			}
 		};
 		return i;
@@ -572,7 +587,7 @@ public class Parser {
 
 	public void save(String executable, int fillOffset) throws IOException, FPGAParseException {
 		FileOutputStream out = new FileOutputStream(executable);
-		
+
 		for (int i = 0; i < fillOffset; i++)
 			out.write(0);
 
@@ -608,11 +623,11 @@ public class Parser {
 
 	public void saveSymFile(String symFile) throws IOException {
 		PrintWriter out = new PrintWriter(new FileWriter(symFile));
-		
+
 		Function main = this.functions.get("main");
 		if (main != null)
 			out.printf("main = 0x%08X\n", main.address);
-		
+
 		for (Function f : this.functions.values()) {
 			if (!f.name.equals("main")) {
 				out.printf("%s = 0x%08X\n", f.name, f.address);
@@ -624,16 +639,16 @@ public class Parser {
 		}
 
 		for (Variable v : this.strings.values()) {
-			out.printf("%s = 0x%08X\n", /*v.fileName +*/ v.name, v.address);
+			out.printf("%s = 0x%08X\n", /* v.fileName + */ v.name, v.address);
 		}
 
 		for (Label l : this.labels.values()) {
 			Instruction assignedTo = l.assignedTo;
 			while (assignedTo instanceof Label) {
-				assignedTo = ((Label)(assignedTo)).assignedTo;
+				assignedTo = ((Label) (assignedTo)).assignedTo;
 			}
 			try {
-				out.printf("%s = 0x%08X\n", /*((Function)(assignedTo.owner)).fileName +*/ l.name, l.address);
+				out.printf("%s = 0x%08X\n", /* ((Function)(assignedTo.owner)).fileName + */ l.name, l.address);
 			} catch (Exception ex) {
 				System.out.printf("assignedTo: %s, l: %s\n", assignedTo, l);
 			}

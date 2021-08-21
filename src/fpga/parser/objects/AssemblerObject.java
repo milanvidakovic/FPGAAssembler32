@@ -46,4 +46,12 @@ public class AssemblerObject {
 		return refs.toString();
 	}
 
+	@Override
+	public String toString() {
+		return "AssemblerObject [name=" + name + ", type=" + type + ", address=" + address + ", dataLabelName="
+				+ dataLabelName + ", dataLabel=" + dataLabel + ", stringContent=" + stringContent + ", lineCount="
+				+ lineCount + ", fileName=" + fileName + "]";
+	}
+
+	
 }
