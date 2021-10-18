@@ -13,6 +13,7 @@ import fpga.parser.instructions.mem.LdInstruction;
 import fpga.parser.instructions.mem.StInstruction;
 import fpga.parser.instructions.mov.BlitInstruction;
 import fpga.parser.instructions.mov.MovInstruction;
+import fpga.parser.instructions.mov.PixInstruction;
 import fpga.parser.instructions.mov.SexInstruction;
 import fpga.parser.instructions.mov.ZexInstruction;
 import fpga.parser.instructions.stack.PushPopInstruction;
@@ -124,6 +125,7 @@ public class Instructions {
 		this.instructions.put("sex.b", new SexInstruction("sex.b"));
 		this.instructions.put("sex.s", new SexInstruction("sex.s"));
 		this.instructions.put("blit", new BlitInstruction("blit"));
+		this.instructions.put("pix", new PixInstruction("pix"));
 
 	}
 }
