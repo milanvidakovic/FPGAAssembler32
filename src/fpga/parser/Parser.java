@@ -382,9 +382,9 @@ public class Parser {
 			if (addr == 0xB000 || addr == 39424) {
 				// this is for the boot loader programs, being assembled to be loaded by the
 				// boot loader
-				// boot loader programs begin at 0xB000 and has the stack set to 400000.
+				// boot loader programs begin at 0xB000 and has the stack set to 500000.
 
-				// add mov.w sp, 465536 instruction at the beginning of the main function
+				// add mov.w sp, 500000 instruction at the beginning of the main function
 				main.instructions.add(0, getStackInstruction());
 				// replace ret instruction with the halt instruction
 				if (main.instructions.get(main.instructions.size() - 1).name.equals("ret")) {
@@ -452,7 +452,8 @@ public class Parser {
 
 			@Override
 			public byte[] generate() {
-				return new byte[] { 0x0f, (byte) 0xb0, 0x00, 0x07, (byte) 0x1a, (byte) 0x80 };
+				// mov.w sp, 500000
+				return new byte[] { 0x0f, (byte) 0xb0, 0x00, 0x07, (byte) 0xa1, (byte) 0x20 };
 			}
 		};
 		return i;
